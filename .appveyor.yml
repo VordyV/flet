@@ -77,35 +77,6 @@ for:
       - mkdir %flet_sdk_root%\packages\flet-desktop\src\flet_desktop\app
       - xcopy flet %flet_sdk_root%\packages\flet-desktop\src\flet_desktop\app\flet\ /s /e
 
-      # install poetry env
-      - cd %flet_sdk_root%
-      - poetry install
-
-      # build "flet-desktop" package
-      - cd packages\flet-desktop
-      - poetry build
-      - ps: |
-          $ErrorActionPreference = "Continue"
-          Get-ChildItem -Path dist/*-py3-none-any.whl | ForEach-Object {
-            python $env:APPVEYOR_BUILD_FOLDER\ci\repackage_wheel_with_tag.py $_.FullName "py3-none-win_amd64"
-            python $env:APPVEYOR_BUILD_FOLDER\ci\repackage_wheel_with_tag.py $_.FullName "py3-none-win32"
-            Remove-Item $_.FullName
-          }
-          $ErrorActionPreference = "Stop"
-      - cd %APPVEYOR_BUILD_FOLDER%
-      - dir %flet_sdk_root%\packages\flet-desktop\dist
-
-      # publish
-      - ps: |
-          if (($env:APPVEYOR_REPO_BRANCH -eq "main" -or $env:APPVEYOR_REPO_TAG_NAME) -and (-not $env:APPVEYOR_PULL_REQUEST_NUMBER)) {
-              twine upload $env:flet_sdk_root\packages\flet-desktop\dist\*
-          } elseif (-not $env:APPVEYOR_PULL_REQUEST_NUMBER) {
-            $wheels = (Get-ChildItem $env:flet_sdk_root/packages/flet-desktop/dist/*.whl | Select-Object -ExpandProperty FullName)
-            foreach ($wheel in $wheels) {
-                curl.exe -sF package=@$wheel https://$env:GEMFURY_TOKEN@push.fury.io/flet/
-            }
-          }
-
     test: off
 
     artifacts:
