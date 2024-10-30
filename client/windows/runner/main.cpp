@@ -27,6 +27,13 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
   FlutterWindow window(project);
   Win32Window::Point origin(150, 150);
   Win32Window::Size size(1280, 720);
+
+  int screen_width = GetSystemMetrics(SM_CXSCREEN);
+  int screen_height = GetSystemMetrics(SM_CYSCREEN);
+
+  int x = (screen_width - size.width) / 2;
+  int y = (screen_height - size.height) / 2;
+  
   if (!window.Create(L"Flet", origin, size)) {
     return EXIT_FAILURE;
   }
